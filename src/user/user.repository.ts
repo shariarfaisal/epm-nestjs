@@ -13,10 +13,16 @@ export class UserRepository extends Repository<User>{
   async signup(dto: SignupDto): Promise<boolean>{
     const { errors, isValid } = signupValidator(dto)
     if(!isValid){
-      throw new BadRequestException(errors)
+      throw new BadRequestException({errors})
+    }
+    const { name, email, password, referralId } = dto
+
+    const emailExists = await this.findOne({ email })
+    if(emailExists){
+      throw new BadRequestException({ errors:{ email: "Email already exists."} })
     }
 
-    const { name, email, password, referralId } = dto
+
     const user = new User()
     const salt = await bcrypt.genSalt()
 
@@ -29,9 +35,6 @@ export class UserRepository extends Repository<User>{
       await user.save()
       return true
     }catch(err){
-      if(err.code === '23505'){
-        throw new ConflictException("Email taken!")
-      }
       throw new InternalServerErrorException()
     }
   }
@@ -41,7 +44,6 @@ export class UserRepository extends Repository<User>{
     if(!isValid){
       throw new BadRequestException(errors)
     }
-
 
     const { email, password } = dto
     const user = await this.findOne({ email })

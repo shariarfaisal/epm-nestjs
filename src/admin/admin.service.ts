@@ -1,15 +1,18 @@
-import { Injectable, NotFoundException, InternalServerErrorException, ConflictException, BadRequestException } from '@nestjs/common';
+import { Injectable, NotFoundException, InternalServerErrorException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm'
 import { AdminRepository } from './admin.repository'
 import { JwtService } from '@nestjs/jwt'
 import { SignupDto } from './dto/signup.dto'
 import { SigninDto } from './dto/signin.dto'
-import { UpdateDto } from './dto/user-update.dto'
+import { UpdateDto } from './dto/update.dto'
 import { Admin } from './admin.entity'
 import { JwtPayload } from './jwt-payload.interface'
 import { PasswordUpdateDto } from './dto/password-update.dto'
 import * as bcrypt from 'bcryptjs'
 import { AdminRole } from './admin-role.enum'
+import { updateValidator } from './validators/update.validator'
+import { updatePasswordValidator } from './validators/password-update.validator'
+
 
 @Injectable()
 export class AdminService {
@@ -61,23 +64,27 @@ export class AdminService {
   }
 
   async updateProfile(dto: UpdateDto, admin: Admin): Promise<Admin>{
+    const { errors, isValid } = updateValidator(dto)
+    if(!isValid){
+      throw new BadRequestException({ errors })
+    }
+
     const { username, email, contact } = dto
     const getAdmin = await this.getAdminById(admin.id)
 
     if(username !== getAdmin.username){
       const usernameExists = await this.adminRepositoty.findOne({ username })
       if(usernameExists){
-        throw new ConflictException("Username taken.")
+        throw new BadRequestException({errors:{username: "Username taken."}})
       }
     }
 
     if(email.toLowerCase() !== getAdmin.email.toLowerCase()){
       const emailExists = await this.adminRepositoty.findOne({ email })
       if(emailExists){
-        throw new ConflictException("Email already exists.")
+        throw new BadRequestException({errors: {email: "Email already exists."}})
       }
     }
-
 
     getAdmin.username = username
     getAdmin.email = email
@@ -87,11 +94,17 @@ export class AdminService {
   }
 
   async updatePassword(dto: PasswordUpdateDto, admin: Admin){
+    const { errors, isValid } = updatePasswordValidator(dto)
+    if(!isValid){
+      throw new BadRequestException({ errors })
+    }
+
+
     const profile = await this.getAdminById(admin.id)
     const { oldPassword, newPassword } = dto
     const salt = bcrypt.genSalt()
-    const isValid = bcrypt.compare(oldPassword,profile.password)
-    if(!isValid){
+    const isValidPass = bcrypt.compare(oldPassword,profile.password)
+    if(!isValidPass){
       throw new BadRequestException("Invalid cridentials.")
     }
 
@@ -107,7 +120,7 @@ export class AdminService {
 
   async updateAdminRole(role: AdminRole, admin: Admin): Promise<Admin>{
     const profile = await this.getAdminById(admin.id)
-    profile.role = role 
+    profile.role = role
     await profile.save()
     return profile
   }

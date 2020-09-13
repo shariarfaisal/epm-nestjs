@@ -2,7 +2,7 @@ import { Controller, Get, Param, Body, Post, Put, Delete, UseGuards, Unauthorize
 import { Admin } from './admin.entity'
 import { SignupDto } from './dto/signup.dto'
 import { SigninDto } from './dto/signin.dto'
-import { UpdateDto } from './dto/user-update.dto'
+import { UpdateDto } from './dto/update.dto'
 import { AdminService } from './admin.service'
 import { AuthGuard } from '@nestjs/passport'
 import { GetAdmin } from './get-admin.decorator'
@@ -16,19 +16,19 @@ export class AdminController {
   ){}
 
     @Get('/')
-    @UseGuards(AuthGuard())
+    @UseGuards(AuthGuard('admin'))
     getAdmins(): Promise<Admin[]>{
       return this.adminService.getAdmins()
     }
 
     @Get('/profile')
-    @UseGuards(AuthGuard())
+    @UseGuards(AuthGuard('admin'))
     getProfile(@GetAdmin() admin: Admin): Promise<Admin>{
       return this.adminService.getAdminById(admin.id)
     }
 
     @Get('/:id')
-    @UseGuards(AuthGuard())
+    @UseGuards(AuthGuard('admin'))
     getAdminById(@Param('id') id: string): Promise<Admin>{
       return this.adminService.getAdminById(id)
     }
@@ -44,19 +44,19 @@ export class AdminController {
     }
 
     @Put('/update')
-    @UseGuards(AuthGuard())
+    @UseGuards(AuthGuard('admin'))
     updateProfile(@Body(ValidationPipe) dto: UpdateDto, @GetAdmin() admin: Admin): Promise<Admin>{
       return this.adminService.updateProfile(dto,admin)
     }
 
     @Put('/password')
-    @UseGuards(AuthGuard())
+    @UseGuards(AuthGuard('admin'))
     updatePassword(@Body(ValidationPipe) dto: PasswordUpdateDto, @GetAdmin() admin: Admin): Promise<string>{
       return this.adminService.updatePassword(dto,admin)
     }
 
     @Put('/update-role')
-    @UseGuards(AuthGuard())
+    @UseGuards(AuthGuard('admin'))
     updateAdminRole(@Body('role') role: AdminRole, @GetAdmin() admin: Admin): Promise<Admin>{
       if(admin.role !== AdminRole.ADMIN && admin.role !== AdminRole.SUPER_ADMIN){
         throw new UnauthorizedException()
@@ -65,7 +65,7 @@ export class AdminController {
     }
 
     @Delete('/delete')
-    @UseGuards(AuthGuard())
+    @UseGuards(AuthGuard('admin'))
     deleteProfile(@GetAdmin() admin: Admin): Promise<boolean>{
       return this.adminService.deleteProfile(admin)
     }

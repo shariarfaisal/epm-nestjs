@@ -1,8 +1,6 @@
 
-export class SignupDto{
+export class UpdateDto{
   username: string;
   email: string;
   contact: string;
-  password: string;
-
 }

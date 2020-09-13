@@ -5,15 +5,15 @@ import { UserRepository } from './user.repository'
 import { TypeOrmModule } from '@nestjs/typeorm'
 import { PassportModule } from '@nestjs/passport'
 import { JwtModule } from '@nestjs/jwt'
-import { LocalStrategy } from './local.strategy'
-
+import { JwtStrategy } from './jwt.strategy'
+import * as config from 'config'
 @Module({
   imports:[
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.register({
-      secret: 'secretkey',
+      secret: process.env.SECRET_KEY || config.get('jwt.secret'),
       signOptions: {
-        expiresIn: 36000
+        expiresIn: process.env.EXPIRES_IN || config.get('jwt.expiresIn')
       }
     }),
     TypeOrmModule.forFeature([ UserRepository ])
@@ -21,7 +21,7 @@ import { LocalStrategy } from './local.strategy'
   controllers: [UserController],
   providers: [
     UserService,
-    LocalStrategy
+    JwtStrategy
   ],
   exports:[
     PassportModule,

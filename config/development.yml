@@ -1,0 +1,12 @@
+db:
+  type: 'postgres'
+  port: 5432
+  host: 'localhost'
+  username: 'postgres'
+  database: 'etherpm'
+  password: 'postgres'
+  synchronize: true
+
+jwt:
+  secret: 'secretkey'
+  expiresIn: 3600

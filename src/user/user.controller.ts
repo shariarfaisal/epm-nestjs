@@ -15,7 +15,7 @@ export class UserController {
   constructor(private userService: UserService){}
 
     @Get('/')
-    @UseGuards(AuthGuard())
+    @UseGuards(AuthGuard('admin'))
     // FIXME: AuthGuard ...
     getUsers(@GetAdmin() admin: Admin):Promise<User[]>{
       return this.userService.getUsers()
@@ -23,13 +23,13 @@ export class UserController {
 
 
     @Get('/profile')
-    @UseGuards(AuthGuard())
+    @UseGuards(AuthGuard('user'))
     getProfile(@GetUser() user: User): Promise<User>{
       return this.userService.getUserById(user.id)
     }
 
     @Get('/:id')
-    @UseGuards(AuthGuard())
+    @UseGuards(AuthGuard('admin'))
     getUserById(@Param('id') id: string): Promise<User>{
       return this.userService.getUserById(id)
     }
@@ -45,19 +45,19 @@ export class UserController {
     }
 
     @Put('/profile')
-    @UseGuards(AuthGuard())
+    @UseGuards(AuthGuard('user'))
     profileUpdate(@Body() dto: UpdateDto, @GetUser() user: User): Promise<User>{
       return this.userService.updateProfile(dto,user)
     }
 
     @Put('/password')
-    @UseGuards(AuthGuard())
+    @UseGuards(AuthGuard('user'))
     updatePassword(dto: PasswordUpdateDto, @GetUser() user: User): Promise<string>{
       return this.userService.updatePassword(dto,user)
     }
 
     @Delete('/delete')
-    @UseGuards(AuthGuard())
+    @UseGuards(AuthGuard('user'))
     deleteProfile(@GetUser() user: User): Promise<string>{
       return this.userService.deleteProfile(user)
     }

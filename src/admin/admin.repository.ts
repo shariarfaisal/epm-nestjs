@@ -1,10 +1,13 @@
-import { ConflictException, InternalServerErrorException, UnauthorizedException } from '@nestjs/common'
+import { ConflictException, InternalServerErrorException, UnauthorizedException, BadRequestException } from '@nestjs/common'
 import { Repository, EntityRepository } from 'typeorm'
 import { Admin } from './admin.entity'
 import { SignupDto } from './dto/signup.dto'
 import { SigninDto } from './dto/signin.dto'
 import * as bcrypt from 'bcryptjs'
 import { AdminRole } from './admin-role.enum'
+import { signupValidator } from './validators/signup.validator'
+import { signinValidator } from './validators/signin.validator'
+
 
 @EntityRepository(Admin)
 export class AdminRepository extends Repository<Admin>{
@@ -15,16 +18,21 @@ export class AdminRepository extends Repository<Admin>{
   }
 
   async signup(dto: SignupDto): Promise<boolean>{
+    const { errors, isValid } = signupValidator(dto)
+    if(!isValid){
+      throw new BadRequestException({ errors })
+    }
+
     const { username, email, password, contact } = dto
 
     const usernameExists = await this.findOne({ username })
     if(usernameExists){
-      throw new ConflictException({ username: "Username taken."})
+      throw new ConflictException({ errors: { username: "Username taken."} })
     }
 
     const emailExists = await this.findOne({ email })
     if(emailExists){
-      throw new ConflictException({ email: "Email already exists."})
+      throw new BadRequestException({ errors: { email: "Email already exists."}})
     }
 
     const admin = new Admin()
@@ -46,6 +54,11 @@ export class AdminRepository extends Repository<Admin>{
   }
 
   async cridentialValidator(dto: SigninDto): Promise<Admin>{
+    const { errors, isValid } = signinValidator(dto)
+    if(!isValid){
+      throw new BadRequestException({ errors })
+    }
+
     const { username, password } = dto
     const admin = await this.findOne({ username })
     if(!admin){

@@ -1,12 +1,19 @@
-import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import { Injectable, InternalServerErrorException, NotFoundException, BadRequestException } from '@nestjs/common';
 import { TokenListing } from './tokenlisting.entity'
 import { CreateDto } from './dto/create.dto'
+import { createValidator } from './validators/create.validator'
 
 @Injectable()
 export class TokenlistingService {
 
   async createToken(dto: CreateDto): Promise<TokenListing>{
-    const { name, email, position, tokenName, symbol, tokenDecimal, tokenContract, websiteLink, description, logoLink, exchange, twitter, telegram, chat, reddit, member, channel, refferedBy} = dto
+    const { errors, isValid } = createValidator(dto)
+    if(!isValid){
+      throw new BadRequestException({ errors })
+    }
+
+
+    const { name, email, position, tokenName, symbol, tokenDecimal, tokenContract, websiteLink, description, logoLink, exchanges, twitter, telegram, chat, reddit, members, channel, refferedBy} = dto
 
     const token = new TokenListing()
     token.name = name
@@ -19,12 +26,12 @@ export class TokenlistingService {
     token.websiteLink = websiteLink
     token.description = description
     token.logoLink = logoLink
-    token.exchange = exchange
+    token.exchanges = exchanges
     token.twitter = twitter
     token.telegram = telegram
     token.chat = chat
     token.reddit = reddit
-    token.member = member
+    token.members = members
     token.channel = channel
     token.refferedBy = refferedBy
 
@@ -51,5 +58,5 @@ export class TokenlistingService {
     return token
   }
 
-  
+
 }

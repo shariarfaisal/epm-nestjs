@@ -36,7 +36,7 @@ export class TokenListing extends BaseEntity{
   logoLink: string;
 
   @Column()
-  exchange: string;
+  exchanges: string;
 
   @Column()
   twitter: string;
@@ -51,7 +51,7 @@ export class TokenListing extends BaseEntity{
   reddit: string;
 
   @Column()
-  member: string;
+  members: string;
 
   @Column()
   channel: string;
