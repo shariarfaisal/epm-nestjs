@@ -42,18 +42,18 @@ export class UserRepository extends Repository<User>{
   async cridentialValidator(dto: SigninDto): Promise<User>{
     const { errors, isValid } = signinValidator(dto)
     if(!isValid){
-      throw new BadRequestException(errors)
+      throw new BadRequestException({errors})
     }
 
     const { email, password } = dto
     const user = await this.findOne({ email })
     if(!user){
-      throw new UnauthorizedException("Invalid cridentials.")
+      throw new BadRequestException("Invalid cridentials.")
     }
 
     const passIsValid = await bcrypt.compare(password,user.password)
     if(!passIsValid){
-      throw new UnauthorizedException("Invalid cridentials.")
+      throw new BadRequestException({ errors:{ message: "Invalid cridentials."}})
     }
     return user
   }

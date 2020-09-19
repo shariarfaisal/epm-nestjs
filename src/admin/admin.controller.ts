@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Body, Post, Put, Delete, UseGuards, UnauthorizedException, ValidationPipe } from '@nestjs/common';
+import { Controller, ParseUUIDPipe, Get, Param, Body, Post, Put, Delete, UseGuards, UnauthorizedException, ValidationPipe } from '@nestjs/common';
 import { Admin } from './admin.entity'
 import { SignupDto } from './dto/signup.dto'
 import { SigninDto } from './dto/signin.dto'
@@ -29,7 +29,7 @@ export class AdminController {
 
     @Get('/:id')
     @UseGuards(AuthGuard('admin'))
-    getAdminById(@Param('id') id: string): Promise<Admin>{
+    getAdminById(@Param('id', ParseUUIDPipe) id: string): Promise<Admin>{
       return this.adminService.getAdminById(id)
     }
 
@@ -43,15 +43,15 @@ export class AdminController {
       return this.adminService.signin(dto)
     }
 
-    @Put('/update')
+    @Put('/profile')
     @UseGuards(AuthGuard('admin'))
-    updateProfile(@Body(ValidationPipe) dto: UpdateDto, @GetAdmin() admin: Admin): Promise<Admin>{
+    updateProfile(@Body() dto: UpdateDto, @GetAdmin() admin: Admin): Promise<Admin>{
       return this.adminService.updateProfile(dto,admin)
     }
 
     @Put('/password')
     @UseGuards(AuthGuard('admin'))
-    updatePassword(@Body(ValidationPipe) dto: PasswordUpdateDto, @GetAdmin() admin: Admin): Promise<string>{
+    updatePassword(@Body() dto: PasswordUpdateDto, @GetAdmin() admin: Admin): Promise<string>{
       return this.adminService.updatePassword(dto,admin)
     }
 

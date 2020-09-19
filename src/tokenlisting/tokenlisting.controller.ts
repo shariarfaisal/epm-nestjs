@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Body, Post, Put, Delete, UseGuards } from '@nestjs/common';
+import { Controller, Get, Param, Body, Post, Put, Delete, UseGuards, ParseUUIDPipe } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport'
 import { GetUser } from '../user/get-user.decorator'
 import { User } from '../user/user.entity'
@@ -11,31 +11,28 @@ export class TokenlistingController {
   constructor(private tokenService: TokenlistingService){}
 
     @Get('/')
-    @UseGuards(AuthGuard())
+    @UseGuards(AuthGuard('admin'))
     getTokens(): Promise<TokenListing[]>{
       return this.tokenService.getTokens()
     }
 
     @Get('/:id')
-    @UseGuards(AuthGuard())
-    getTokenById(@Param('id') id: string): Promise<TokenListing>{
+    @UseGuards(AuthGuard('admin'))
+    getTokenById(@Param('id', ParseUUIDPipe) id: string): Promise<TokenListing>{
       return this.tokenService.getToken(id)
     }
 
     @Post('/')
-    @UseGuards(AuthGuard())
+    @UseGuards(AuthGuard('user'))
     createToken(@Body() dto: CreateDto, @GetUser() user: User){
       return this.tokenService.createToken(dto)
     }
 
-    @Put('/update')
-    updateToken(){
 
-    }
-
-    @Delete('/delete')
-    deleteToken(){
-
+    @Delete('/:id')
+    @UseGuards(AuthGuard('admin'))
+    deleteToken(@Param('id', ParseUUIDPipe) id: string): Promise<boolean>{
+      return this.tokenService.getDelete(id)
     }
 
 }

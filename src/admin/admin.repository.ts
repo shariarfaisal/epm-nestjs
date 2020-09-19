@@ -62,12 +62,12 @@ export class AdminRepository extends Repository<Admin>{
     const { username, password } = dto
     const admin = await this.findOne({ username })
     if(!admin){
-      throw new UnauthorizedException("Invalid cridentials.")
+      throw new BadRequestException({ errors: {message: "Invalid cridentials."}})
     }
 
     const passIsValid = await bcrypt.compare(password,admin.password)
     if(!passIsValid){
-      throw new UnauthorizedException("Invalid cridentials.")
+      throw new BadRequestException({errors:{ message: "Invalid cridentials."}})
     }
     return admin
   }

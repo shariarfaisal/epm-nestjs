@@ -53,6 +53,14 @@ export class UserService {
 
     const { name, email } = dto
     const getUser = await this.getUserById(user.id)
+
+    if(email !== getUser.email){
+      const emailExists = await this.userRepositoty.findOne({ email })
+      if(emailExists){
+        throw new BadRequestException({ errors: {email: "Email already exists!"}})
+      }
+    }
+
     getUser.name = name
     getUser.email = email
 
@@ -60,9 +68,6 @@ export class UserService {
       await getUser.save()
       return getUser
     }catch(err){
-      if(err.code === '23505'){
-        throw new ConflictException("Email taken!")
-      }
       throw new InternalServerErrorException()
     }
   }
@@ -70,15 +75,15 @@ export class UserService {
   async updatePassword(dto: PasswordUpdateDto, user: User): Promise<string>{
     const { errors, isValid } = passwordUpdateValidator(dto)
     if(!isValid){
-      throw new BadRequestException(errors)
+      throw new BadRequestException({ errors })
     }
 
     const profile = await this.getUserById(user.id)
     const { oldPassword, newPassword } = dto
-    const salt = bcrypt.genSalt()
-    const isPassValid = bcrypt.compare(oldPassword,profile.password)
+    const salt = await bcrypt.genSalt()
+    const isPassValid = await bcrypt.compare(oldPassword,profile.password)
     if(!isPassValid){
-      throw new BadRequestException("Invalid cridentials.")
+      throw new BadRequestException({ errors: {oldPassword: "Invalid old password." }})
     }
 
     profile.password = await bcrypt.hash(newPassword,salt)

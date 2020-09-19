@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Body, Post, Put, Delete, ValidationPipe, UseGuards } from '@nestjs/common';
+import { Controller, Get, Param, Body, Post, Put, Delete, ValidationPipe, UseGuards, ParseUUIDPipe } from '@nestjs/common';
 import { SignupDto } from './dto/signup.dto'
 import { SigninDto } from './dto/signin.dto'
 import { UserService } from './user.service'
@@ -30,7 +30,7 @@ export class UserController {
 
     @Get('/:id')
     @UseGuards(AuthGuard('admin'))
-    getUserById(@Param('id') id: string): Promise<User>{
+    getUserById(@Param('id',ParseUUIDPipe) id: string): Promise<User>{
       return this.userService.getUserById(id)
     }
 
@@ -52,7 +52,7 @@ export class UserController {
 
     @Put('/password')
     @UseGuards(AuthGuard('user'))
-    updatePassword(dto: PasswordUpdateDto, @GetUser() user: User): Promise<string>{
+    updatePassword(@Body() dto: PasswordUpdateDto, @GetUser() user: User): Promise<string>{
       return this.userService.updatePassword(dto,user)
     }
 

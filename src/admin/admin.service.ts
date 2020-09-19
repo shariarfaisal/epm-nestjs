@@ -102,10 +102,11 @@ export class AdminService {
 
     const profile = await this.getAdminById(admin.id)
     const { oldPassword, newPassword } = dto
-    const salt = bcrypt.genSalt()
-    const isValidPass = bcrypt.compare(oldPassword,profile.password)
+    console.log(dto,profile.password)
+    const salt = await bcrypt.genSalt()
+    const isValidPass = await bcrypt.compare(oldPassword,profile.password)
     if(!isValidPass){
-      throw new BadRequestException("Invalid cridentials.")
+      throw new BadRequestException({errors: {message: "Invalid cridentials."}})
     }
 
     profile.password = await bcrypt.hash(newPassword,salt)

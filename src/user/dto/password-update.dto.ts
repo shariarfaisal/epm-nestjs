@@ -1,5 +1,5 @@
 
-export interface PasswordUpdateDto{
+export class PasswordUpdateDto{
   oldPassword: string;
   newPassword: string;
 }

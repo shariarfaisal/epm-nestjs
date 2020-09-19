@@ -58,5 +58,13 @@ export class TokenlistingService {
     return token
   }
 
+  async getDelete(id: string): Promise<boolean>{
+    const deleted = await TokenListing.delete(id)
+    if(deleted.affected === 0){
+      throw new NotFoundException()
+    }
+    return true
+  }
+
 
 }
